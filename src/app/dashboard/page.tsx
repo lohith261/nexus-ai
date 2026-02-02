@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChatInterface } from '@/components/chat/ChatInterface';
 import { Database, Sparkles, Plus } from 'lucide-react';
 import { datasetInfo } from '@/data/saas-metrics';
 
@@ -10,10 +9,10 @@ export default function DashboardPage() {
   const [pinnedCharts, setPinnedCharts] = useState<React.ReactNode[]>([]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#0a0a0f]/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0a0a0f] flex flex-col">
+      {/* Fixed Header */}
+      <header className="h-16 border-b border-white/10 bg-[#0a0a0f]/80 backdrop-blur-md flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-violet-500 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-black" />
@@ -35,12 +34,28 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="pt-16 h-screen">
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-6 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            {/* Chat Section */}
-            <div className="lg:col-span-1 h-full min-h-[500px]">
-              <ChatInterface />
+            {/* Chat Section - Placeholder for now */}
+            <div className="lg:col-span-1 h-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col">
+              <h3 className="text-sm font-medium text-gray-400 mb-4">Chat with AI</h3>
+              <div className="flex-1 overflow-y-auto space-y-4">
+                <div className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                  <p className="text-sm text-gray-300">I've loaded your data. Ask me anything!</p>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Ask about your data..."
+                  className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+                />
+                <button className="px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 text-white text-sm">
+                  Send
+                </button>
+              </div>
             </div>
 
             {/* Dashboard Canvas */}

@@ -1,131 +1,38 @@
-# Tambo Template
+# NEXUS | Conversational Analytics Platform
 
-This is a starter NextJS app with Tambo hooked up to get your AI app development started quickly.
+&gt; **"Not a dashboard. A conversation that creates itself."**
 
-## Get Started
+NEXUS is an AI-powered data intelligence platform built for [The UI Strikes Back](https://www.wemakedevs.org/hackathons/tambo) hackathon powered by Tambo. It transforms complex data analysis into natural conversations, allowing users to visualize trends, compare metrics, and gain insights through simple chat interactions.
 
-1. Run `npm create-tambo@latest my-tambo-app` for a new project
+## 🚀 Features
 
-2. `npm install`
+- **Natural Language Queries** - Ask questions about your data in plain English
+- **Dynamic Visualization** - AI generates charts (Line, Bar, Pie) and insight cards automatically
+- **Interactive Dashboard** - Pin charts to build personalized dashboards
+- **Real-time Analysis** - Streaming UI with animated component rendering
+- **Multi-modal Input** - Support for CSV/Excel uploads and sample datasets
 
-3. `npx tambo init`
+## 🛠️ Tech Stack
 
-- or rename `example.env.local` to `.env.local` and add your tambo API key you can get for free [here](https://tambo.co/dashboard).
+- **Framework**: Next.js 14 + React + TypeScript
+- **Styling**: Tailwind CSS + Framer Motion
+- **AI Integration**: Tambo AI SDK
+- **Visualization**: Recharts
+- **Icons**: Lucide React
 
-4. Run `npm run dev` and go to `localhost:3000` to use the app!
-
-## Customizing
-
-### Change what components tambo can control
-
-You can see how components are registered with tambo in `src/lib/tambo.ts`:
-
-```tsx
-export const components: TamboComponent[] = [
-  {
-    name: "Graph",
-    description:
-      "A component that renders various types of charts (bar, line, pie) using Recharts. Supports customizable data visualization with labels, datasets, and styling options.",
-    component: Graph,
-    propsSchema: graphSchema,
-  },
-  // Add more components here
-];
-```
-
-You can install the graph component into any project with:
+## 📦 Installation
 
 ```bash
-npx tambo add graph
-```
+# Clone the repository
+git clone https://github.com/lohith261/nexus-ai.git
+cd nexus-ai
 
-The example Graph component demonstrates several key features:
+# Install dependencies
+npm install
 
-- Different prop types (strings, arrays, enums, nested objects)
-- Multiple chart types (bar, line, pie)
-- Customizable styling (variants, sizes)
-- Optional configurations (title, legend, colors)
-- Data visualization capabilities
+# Set up environment variables
+cp .env.local.example .env.local
+# Add your Tambo API key to .env.local
 
-Update the `components` array with any component(s) you want tambo to be able to use in a response!
-
-You can find more information about the options [here](https://docs.tambo.co/concepts/generative-interfaces/generative-components)
-
-### Add tools for tambo to use
-
-Tools are defined with `inputSchema` and `outputSchema`:
-
-```tsx
-export const tools: TamboTool[] = [
-  {
-    name: "globalPopulation",
-    description:
-      "A tool to get global population trends with optional year range filtering",
-    tool: getGlobalPopulationTrend,
-    inputSchema: z.object({
-      startYear: z.number().optional(),
-      endYear: z.number().optional(),
-    }),
-    outputSchema: z.array(
-      z.object({
-        year: z.number(),
-        population: z.number(),
-        growthRate: z.number(),
-      }),
-    ),
-  },
-];
-```
-
-Find more information about tools [here.](https://docs.tambo.co/concepts/tools)
-
-### The Magic of Tambo Requires the TamboProvider
-
-Make sure in the TamboProvider wrapped around your app:
-
-```tsx
-...
-<TamboProvider
-  apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-  components={components} // Array of components to control
-  tools={tools} // Array of tools it can use
->
-  {children}
-</TamboProvider>
-```
-
-In this example we do this in the `Layout.tsx` file, but you can do it anywhere in your app that is a client component.
-
-### Voice input
-
-The template includes a `DictationButton` component using the `useTamboVoice` hook for speech-to-text input.
-
-### MCP (Model Context Protocol)
-
-The template includes MCP support for connecting to external tools and resources. You can use the MCP hooks from `@tambo-ai/react/mcp`:
-
-- `useTamboMcpPromptList` - List available prompts from MCP servers
-- `useTamboMcpPrompt` - Get a specific prompt
-- `useTamboMcpResourceList` - List available resources
-
-See `src/components/tambo/mcp-components.tsx` for example usage.
-
-### Change where component responses are shown
-
-The components used by tambo are shown alongside the message response from tambo within the chat thread, but you can have the result components show wherever you like by accessing the latest thread message's `renderedComponent` field:
-
-```tsx
-const { thread } = useTambo();
-const latestComponent =
-  thread?.messages[thread.messages.length - 1]?.renderedComponent;
-
-return (
-  <div>
-    {latestComponent && (
-      <div className="my-custom-wrapper">{latestComponent}</div>
-    )}
-  </div>
-);
-```
-
-For more detailed documentation, visit [Tambo's official docs](https://docs.tambo.co).
+# Run development server
+npm run dev
