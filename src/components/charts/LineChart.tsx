@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart as ReLineChart,
@@ -11,35 +12,68 @@ import {
   ResponsiveContainer,
   Area,
 } from 'recharts';
+import { getTimeSeriesData } from '@/lib/tambo-tools';
+import { normalizeMetric, normalizeTimeRange } from '@/lib/normalize-metric';
 
 interface DataPoint {
   date: string;
   value: number;
-  [key: string]: any;
 }
 
 interface LineChartProps {
-  data: DataPoint[];
+  metric?: string;
+  timeRange?: string;
   title?: string;
-  xAxisKey?: string;
-  yAxisKey?: string;
   color?: string;
-  showArea?: boolean;
 }
 
 export function LineChart({
-  data,
+  metric: rawMetric,
+  timeRange: rawTimeRange,
   title,
-  xAxisKey = 'date',
-  yAxisKey = 'value',
   color = '#00f0ff',
-  showArea = true,
 }: LineChartProps) {
+  const [data, setData] = useState<DataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const metric = normalizeMetric(rawMetric);
+  const timeRange = normalizeTimeRange(rawTimeRange);
+
+  useEffect(() => {
+    setLoading(true);
+    try {
+      const result = getTimeSeriesData({ metric, timeRange });
+      setData(result);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [metric, timeRange]);
+
+  if (loading) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 animate-pulse">
+        {title && <div className="h-6 w-32 bg-white/10 rounded mb-4" />}
+        <div className="h-[300px] bg-white/5 rounded" />
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-gray-500">
+        {title && <h3 className="text-lg font-semibold mb-4 text-gray-200">{title}</h3>}
+        <p>No data available</p>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full"
+      className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10"
     >
       {title && (
         <h3 className="text-lg font-semibold mb-4 text-gray-200">{title}</h3>
@@ -48,14 +82,14 @@ export function LineChart({
         <ResponsiveContainer width="100%" height="100%">
           <ReLineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <defs>
-              <linearGradient id={`gradient-${yAxisKey}`} x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.3} />
                 <stop offset="95%" stopColor={color} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
             <XAxis
-              dataKey={xAxisKey}
+              dataKey="date"
               stroke="rgba(255,255,255,0.3)"
               fontSize={12}
               tickLine={false}
@@ -76,17 +110,15 @@ export function LineChart({
               }}
               labelStyle={{ color: 'rgba(255,255,255,0.5)' }}
             />
-            {showArea && (
-              <Area
-                type="monotone"
-                dataKey={yAxisKey}
-                stroke="none"
-                fill={`url(#gradient-${yAxisKey})`}
-              />
-            )}
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="none"
+              fill="url(#lineGradient)"
+            />
             <Line
               type="monotone"
-              dataKey={yAxisKey}
+              dataKey="value"
               stroke={color}
               strokeWidth={2}
               dot={{ fill: color, strokeWidth: 0, r: 4 }}

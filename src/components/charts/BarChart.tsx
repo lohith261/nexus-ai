@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart as ReBarChart,
@@ -11,32 +12,67 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { getComparisonData } from '@/lib/tambo-tools';
+import { normalizeMetric, normalizeGroupBy } from '@/lib/normalize-metric';
 
 interface DataPoint {
   name: string;
   value: number;
-  [key: string]: any;
 }
 
 interface BarChartProps {
-  data: DataPoint[];
+  metric?: string;
+  groupBy?: string;
   title?: string;
-  xAxisKey?: string;
-  yAxisKey?: string;
-  colors?: string[];
-  height?: number;
 }
 
 const defaultColors = ['#00f0ff', '#7000ff', '#ff006e', '#00ff9f', '#ffb800'];
 
 export function BarChart({
-  data,
+  metric: rawMetric,
+  groupBy: rawGroupBy,
   title,
-  xAxisKey = 'name',
-  yAxisKey = 'value',
-  colors = defaultColors,
-  height = 300,
 }: BarChartProps) {
+  const [data, setData] = useState<DataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const metric = normalizeMetric(rawMetric);
+  const groupBy = normalizeGroupBy(rawGroupBy);
+
+  useEffect(() => {
+    setLoading(true);
+    try {
+      const result = getComparisonData({ metrics: [metric], groupBy });
+      const transformed = result.map(item => ({
+        name: String(item.name),
+        value: Number(item[metric] || 0),
+      }));
+      setData(transformed);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [metric, groupBy]);
+
+  if (loading) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 animate-pulse">
+        {title && <div className="h-6 w-32 bg-white/10 rounded mb-4" />}
+        <div className="h-[300px] bg-white/5 rounded" />
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-gray-500">
+        {title && <h3 className="text-lg font-semibold mb-4 text-gray-200">{title}</h3>}
+        <p>No data available</p>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,12 +82,12 @@ export function BarChart({
       {title && (
         <h3 className="text-lg font-semibold mb-6 text-gray-200">{title}</h3>
       )}
-      <div style={{ height }}>
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ReBarChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
             <XAxis
-              dataKey={xAxisKey}
+              dataKey="name"
               stroke="rgba(255,255,255,0.3)"
               fontSize={12}
               tickLine={false}
@@ -72,9 +108,9 @@ export function BarChart({
               }}
               cursor={{ fill: 'rgba(255,255,255,0.02)' }}
             />
-            <Bar dataKey={yAxisKey} radius={[4, 4, 0, 0]}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={defaultColors[index % defaultColors.length]} />
               ))}
             </Bar>
           </ReBarChart>

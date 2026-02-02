@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   PieChart as RePieChart,
@@ -9,6 +10,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { getDistributionData } from '@/lib/tambo-tools';
+import { normalizeMetric } from '@/lib/normalize-metric';
 
 interface DataPoint {
   name: string;
@@ -16,20 +19,53 @@ interface DataPoint {
 }
 
 interface PieChartProps {
-  data: DataPoint[];
+  metric?: string;
+  segments?: number;
   title?: string;
-  colors?: string[];
-  height?: number;
 }
 
 const defaultColors = ['#00f0ff', '#7000ff', '#ff006e', '#00ff9f', '#ffb800', '#ff4444'];
 
 export function PieChart({
-  data,
+  metric: rawMetric,
+  segments = 4,
   title,
-  colors = defaultColors,
-  height = 300,
 }: PieChartProps) {
+  const [data, setData] = useState<DataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const metric = normalizeMetric(rawMetric);
+
+  useEffect(() => {
+    setLoading(true);
+    try {
+      const result = getDistributionData({ metric, segments });
+      setData(result);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [metric, segments]);
+
+  if (loading) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 animate-pulse">
+        {title && <div className="h-6 w-32 bg-white/10 rounded mb-4" />}
+        <div className="h-[300px] bg-white/5 rounded" />
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full p-6 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-gray-500">
+        {title && <h3 className="text-lg font-semibold mb-4 text-gray-200">{title}</h3>}
+        <p>No data available</p>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +75,7 @@ export function PieChart({
       {title && (
         <h3 className="text-lg font-semibold mb-6 text-gray-200">{title}</h3>
       )}
-      <div style={{ height }}>
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <RePieChart>
             <Pie
@@ -51,8 +87,8 @@ export function PieChart({
               paddingAngle={5}
               dataKey="value"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={defaultColors[index % defaultColors.length]} />
               ))}
             </Pie>
             <Tooltip
