@@ -1,72 +1,71 @@
-'use client';
-
 import { TamboComponent } from '@tambo-ai/react';
+import type { ComponentType } from 'react';
 import { z } from 'zod';
-import { LineChart } from '@/components/charts/LineChart';
-import { BarChart } from '@/components/charts/BarChart';
-import { PieChart } from '@/components/charts/PieChart';
-import { InsightCard } from '@/components/charts/InsightCard';
 
-// Simple schemas - no transforms, just accept strings
-// Normalization happens in the components
 const lineChartSchema = z.object({
-  metric: z.string().optional().describe('Metric name: mrr, newCustomers, churnedCustomers, cac, nps, supportTickets, or featureAdoption'),
-  timeRange: z.string().optional().describe('Time range: all, last6months, last3months, or ytd'),
-  title: z.string().optional().describe('Chart title'),
-  color: z.string().optional().describe('Line color hex code'),
+  data: z.array(z.object({
+    date: z.string(),
+    value: z.number(),
+  })),
+  title: z.string().optional(),
+  color: z.string().default('#00f0ff'),
 });
 
 const barChartSchema = z.object({
-  metric: z.string().optional().describe('Metric name: mrr, newCustomers, churnedCustomers, cac, nps, supportTickets, or featureAdoption'),
-  groupBy: z.string().optional().describe('Group by: quarter or month'),
-  title: z.string().optional().describe('Chart title'),
+  data: z.array(z.object({
+    name: z.string(),
+    value: z.number(),
+  })),
+  title: z.string().optional(),
 });
 
 const pieChartSchema = z.object({
-  metric: z.string().optional().describe('Metric name: mrr, newCustomers, churnedCustomers, cac, nps, supportTickets, or featureAdoption'),
-  segments: z.number().optional().describe('Number of segments (default 4)'),
-  title: z.string().optional().describe('Chart title'),
+  data: z.array(z.object({
+    name: z.string(),
+    value: z.number(),
+  })),
+  title: z.string().optional(),
 });
 
-const insightCardSchema = z.object({
-  metricKey: z.string().optional().describe('Metric key: mrr, newCustomers, churnRate, or nps'),
-  title: z.string().optional().describe('Card title'),
-  value: z.union([z.string(), z.number()]).optional().describe('Display value'),
-  change: z.number().optional().describe('Percentage change from last period'),
-  trend: z.string().optional().describe('Trend direction: up, down, or neutral'),
-  description: z.string().optional().describe('Additional description'),
-});
+// Export schemas for use in components
+export { lineChartSchema, barChartSchema, pieChartSchema };
 
-// Register components
 export const tamboComponents: TamboComponent[] = [
   {
     name: 'LineChart',
-    description: 'A line chart for showing trends over time. The component fetches data automatically. Use metric="mrr" for revenue, "newCustomers" for customer growth, "nps" for satisfaction, etc. Example: {metric: "mrr", title: "Revenue Trends"}',
-    component: LineChart,
+    description: 'A line chart showing trends over time. Use for MRR, revenue trends, or any time-series data.',
+    component: (() => null) as ComponentType<any>, // This will be mapped to actual component in TamboProvider
     propsSchema: lineChartSchema,
   },
   {
     name: 'BarChart',
-    description: 'A bar chart for comparing data by quarter or month. Use metric="mrr" and groupBy="quarter" for quarterly revenue. Example: {metric: "mrr", groupBy: "quarter", title: "Quarterly Revenue"}',
-    component: BarChart,
+    description: 'A bar chart comparing categories. Use for quarterly comparisons, product performance.',
+    component: (() => null) as ComponentType<any>,
     propsSchema: barChartSchema,
   },
   {
     name: 'PieChart',
-    description: 'A donut chart showing data distribution. Example: {metric: "mrr", title: "Revenue Distribution"}',
-    component: PieChart,
+    description: 'A donut chart showing distribution. Use for customer segments, market share.',
+    component: (() => null) as ComponentType<any>,
     propsSchema: pieChartSchema,
-  },
-  {
-    name: 'InsightCard',
-    description: 'A metric card with value and trend. Use metricKey to auto-fetch (mrr, newCustomers, churnRate, nps) OR provide value directly. Example: {metricKey: "mrr"} or {title: "Sales", value: "$50k", trend: "up"}',
-    component: InsightCard,
-    propsSchema: insightCardSchema,
   },
 ];
 
-// No tools - components fetch their own data
-export const tamboTools: never[] = [];
-
 export const components = tamboComponents;
+export const tamboTools: any[] = [];
 export const tools = tamboTools;
+
+export const tamboConfig = {
+  environment: 'production' as const,
+  components: tamboComponents,
+  tools: tamboTools,
+  model: {
+    provider: 'openai' as const,
+    model: 'gpt-4o',
+    temperature: 0.2,
+  },
+  streaming: {
+    enabled: true,
+    delay: 50,
+  },
+};

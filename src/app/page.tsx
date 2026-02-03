@@ -10,6 +10,7 @@ import { MagneticButton } from '@/components/animations/MagneticButton';
 import { GlowingCard } from '@/components/animations/GlowingCard';
 import { StaggerContainer } from '@/components/animations/StaggerContainer';
 import { FloatingParticles } from '@/components/animations/FloatingParticles';
+import Link from 'next/link';
 
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -32,7 +33,7 @@ export default function Home() {
   return (
     <div ref={heroRef} className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden relative">
       {/* Animated gradient background */}
-      <div 
+      <div
         className="gradient-bg absolute inset-0 opacity-30"
         style={{
           background: 'radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%)',
@@ -60,21 +61,21 @@ export default function Home() {
                 <Sparkles className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm text-cyan-400 font-medium">Powered by Tambo AI</span>
               </motion.div>
-              
+
               <h1 className="text-6xl md:text-7xl font-bold mb-8 leading-tight">
                 <TextReveal text="Analyze Data with " delay={0.2} />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-500 to-cyan-400 animate-gradient">
                   Natural Language
                 </span>
               </h1>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
                 className="text-gray-400 text-xl max-w-2xl mx-auto mb-12 leading-relaxed"
               >
-                Upload your data or use our sample dataset. Ask questions, get insights, 
+                Upload your data or use our sample dataset. Ask questions, get insights,
                 and visualize trends — all through conversation.
               </motion.p>
 
@@ -109,7 +110,7 @@ export default function Home() {
                   <p className="text-gray-400 mb-6 leading-relaxed">
                     Import CSV, Excel, or JSON files. We'll automatically detect schemas and prepare your data for analysis.
                   </p>
-                  <MagneticButton 
+                  <MagneticButton
                     className="flex items-center gap-2 text-cyan-400 font-medium group/btn"
                     strength={0.2}
                   >
@@ -120,8 +121,8 @@ export default function Home() {
               </GlowingCard>
 
               {/* Sample Dataset Card */}
-              <GlowingCard 
-                className="stagger-item p-8 rounded-2xl border border-white/10 cursor-pointer group" 
+              <GlowingCard
+                className="stagger-item p-8 rounded-2xl border border-white/10 cursor-pointer group"
                 glowColor="rgba(112, 0, 255, 0.3)"
               >
                 <div className="relative">
@@ -140,14 +141,17 @@ export default function Home() {
                       {datasetInfo.columns.length} columns
                     </span>
                   </div>
-                  <MagneticButton 
-                    className="flex items-center gap-2 text-violet-400 font-medium group/btn"
-                    strength={0.2}
-                    onClick={() => setDataLoaded(true)}
-                  >
-                    Start Analysis
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </MagneticButton>
+
+                  {/* Use Link component instead of button */}
+                  <Link href="/dashboard">
+                    <MagneticButton
+                      className="flex items-center gap-2 text-violet-400 font-medium group/btn"
+                      strength={0.2}
+                    >
+                      Start Analysis
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </MagneticButton>
+                  </Link>
                 </div>
               </GlowingCard>
             </StaggerContainer>
