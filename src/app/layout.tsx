@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { TamboProvider } from '@/components/providers/TamboProvider';
+import { Navigation } from '@/components/Navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+      <body className={`${inter.className} antialiased bg-[#0a0a0f] text-white`} suppressHydrationWarning>
         <TamboProvider>
-          {children}
+          <Navigation />
+          <main className="pt-16">
+            {children}
+          </main>
         </TamboProvider>
       </body>
     </html>
